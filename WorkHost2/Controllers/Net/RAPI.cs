@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace WorkHost2.Controllers.Net
 {
     public class RAPI
-    { 
+    {
         public static string JobList()
         {
             string jobasdasd = "http://20.249.17.147:5000/v1/job/joblist_username";
@@ -45,13 +46,14 @@ namespace WorkHost2.Controllers.Net
             webRequest.Method = "POST";
             webRequest.Timeout = 30 * 1000;
             webRequest.ContentType = "application/json";
-
+            Console.WriteLine("===DB에 들어갈 API 값들===");
             Console.WriteLine(start);
             Console.WriteLine(end);
             Console.WriteLine(state);
             Console.WriteLine(jobs);
             Console.WriteLine(HostId);
             Console.WriteLine(WorkFlowaName);
+            Console.WriteLine("==========================");
 
             var obj = new RunData
             {
@@ -63,13 +65,6 @@ namespace WorkHost2.Controllers.Net
                 HostId = HostId,
                 ResultData = result
             };
-
-            Console.WriteLine(start);
-            Console.WriteLine(end);
-            Console.WriteLine(state);
-            Console.WriteLine(jobs);
-            Console.WriteLine(HostId);
-            Console.WriteLine(WorkFlowaName);
 
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
             Console.WriteLine(json.ToString());
@@ -99,20 +94,59 @@ namespace WorkHost2.Controllers.Net
             Console.WriteLine(responseText);
             return "API 발송 성공";
         }
-        public static string State10(long jobid)
+        public static string StateON(long jobid)
         {
-            using (var client = new HttpClient())
+            string API = "http://20.249.17.147:5000/v1/job/state1";
+            string responseText = string.Empty;
+
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(API + $"?JobId={jobid}");
+            webRequest.Method = "PUT";
+            webRequest.Timeout = 30 * 1000;
+            webRequest.ContentType = "application/json";
+            Console.WriteLine(jobid + "jobid 넘기는거 성공");
+
+            //Data를 잘 받았는지 확인하는 response 구간
+            //응답 받기
+            using (HttpWebResponse resp = (HttpWebResponse)webRequest.GetResponse())
             {
-                var data = new { JobId = jobid };
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
-                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                HttpStatusCode status = resp.StatusCode;
+                Console.WriteLine(status);      // status 가 정상일경우 OK가 입력된다.
 
-                var response = client.PutAsync("http://20.249.17.147:5000/v1/job/state1", content).Result;
-
-                Console.WriteLine(response.StatusCode);
-                Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+                // 응답과 관련된 stream을 가져온다.
+                Stream respStream = resp.GetResponseStream();
+                using (StreamReader streamReader = new StreamReader(respStream))
+                {
+                    responseText = streamReader.ReadToEnd();
+                }
             }
-            return "API 발송 성공";
+            return responseText;
+        }
+        public static string StateOFF(long jobid)
+        {
+            string API = "http://20.249.17.147:5000/v1/job/state0";
+            string responseText = string.Empty;
+
+            HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(API + $"?JobId={jobid}");
+            webRequest.Method = "PUT";
+            webRequest.Timeout = 30 * 1000;
+            webRequest.ContentType = "application/json";
+            Console.WriteLine(jobid + "jobid 넘기는거 성공");
+
+            //Data를 잘 받았는지 확인하는 response 구간
+            //응답 받기
+            using (HttpWebResponse resp = (HttpWebResponse)webRequest.GetResponse())
+            {
+                HttpStatusCode status = resp.StatusCode;
+                Console.WriteLine(status);      // status 가 정상일경우 OK가 입력된다.
+
+                // 응답과 관련된 stream을 가져온다.
+                Stream respStream = resp.GetResponseStream();
+                using (StreamReader streamReader = new StreamReader(respStream))
+                {
+                    responseText = streamReader.ReadToEnd();
+                }
+            }
+            return responseText;
         }
     }
 }

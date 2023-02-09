@@ -9,7 +9,7 @@ namespace WorkHost2.Controllers
 {
     public class jobid
     {
-        public long Id { get; set; }
+        public long JobId { get; set; }
     }
     public class RunData
     {
@@ -96,7 +96,7 @@ namespace WorkHost2.Controllers
                 var results = "";
                 DateTime start = DateTime.Now;
                 long jobid = mod.JobId;
-                Net.RAPI.State10(jobid);
+                string result =  Net.RAPI.StateON(jobid);
                 try
                 {
                     using (var process = Process.Start(psi))
@@ -104,8 +104,10 @@ namespace WorkHost2.Controllers
                         erros = process.StandardError.ReadToEnd();
                         results = process.StandardOutput.ReadToEnd();
                     }
+                    Console.WriteLine(result);
                     Console.WriteLine(results);
                     DateTime end = DateTime.Now;
+                    string resut = Net.RAPI.StateOFF(jobid);
                     Net.RAPI.SendAPI(start, end, "10", mod.JobId, mod.HostId, mod.WorkflowName, results);
                     Console.WriteLine("¼º°ø");
                 }
