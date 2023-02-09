@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
@@ -39,7 +40,13 @@ namespace WorkHost2.Controllers
     public class WorkerHost
     {
         [HttpPost("1")]
-        public string ProcessStart(WorkerHostModel mod)
+        public async Task<string> Main(WorkerHostModel mod)
+        {
+            Task Start = CompareExtension(mod);
+            string result = DateTime.Now.ToString();
+            return "성공시간 " + result;
+        }
+        public static async Task CompareExtension(WorkerHostModel mod)
         {
             //WorkFlowname을 받아와서 그 파일이 있는지 없는지 검사하는 파일
             string example = "blob/" + mod.WorkflowName;
@@ -60,7 +67,6 @@ namespace WorkHost2.Controllers
                     r = r.Substring(1, r.Length - 1);
                 if (r.Substring(r.Length - 2, 2) == @"]""")
                     r = r.Substring(0, r.Length - 1);
-                Console.WriteLine(r);
                 var ob = System.Text.Json.JsonSerializer.Deserialize<List<JobUserNameModel>>(r);
                 string workFlowBlob = "";
                 foreach (var a in ob)
@@ -70,13 +76,9 @@ namespace WorkHost2.Controllers
                         workFlowBlob = a.WorkflowBlob;
                     }
                 }
-
-                Console.WriteLine(workFlowBlob);
-
                 byte[] bytes = System.Convert.FromBase64String(workFlowBlob);
                 Console.WriteLine(string.Join("", bytes));
                 File.WriteAllBytes(example, bytes);
-
             }
 
             //파일의 경로에서 확장자 및 파일이름+확장자 추출
@@ -91,33 +93,8 @@ namespace WorkHost2.Controllers
             if (fileExtension == ".py")
             {
                 var psi = CreateProcessStartInfo(@"/usr/bin/python3", example);
-
-                var erros = "";
-                var results = "";
-                DateTime start = DateTime.Now;
                 long jobid = mod.JobId;
-                string result =  Net.RAPI.StateON(jobid);
-                try
-                {
-                    using (var process = Process.Start(psi))
-                    {
-                        erros = process.StandardError.ReadToEnd();
-                        results = process.StandardOutput.ReadToEnd();
-                    }
-                    Console.WriteLine(result);
-                    Console.WriteLine(results);
-                    DateTime end = DateTime.Now;
-                    string resut = Net.RAPI.StateOFF(jobid);
-                    Net.RAPI.SendAPI(start, end, "10", mod.JobId, mod.HostId, mod.WorkflowName, results);
-                    Console.WriteLine("성공");
-                }
-                catch (Exception ex)
-                {
-                    DateTime end = DateTime.Now;
-                    Net.RAPI.SendAPI(start, end, "11", mod.JobId, mod.HostId, mod.WorkflowName, erros);
-                    //실행 성공/실패시 쏴주는 API
-                    Console.WriteLine("실패" + ex.ToString());
-                }
+                ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName);
             }
             //.gz 파일을 받아 압축을 풀고 dll 파일을 실행
             else if (fileExtension == ".gz")
@@ -275,7 +252,7 @@ namespace WorkHost2.Controllers
                     Console.WriteLine("실패");
                 }
             }
-            //blob 파일 내에 .dll 파일실행
+            //blob 파일 내에 .dll 파일실행 
             else if (fileExtension == ".dll")
             {
                 var psi = CreateProcessStartInfo(@"dotnet", example);
@@ -340,10 +317,34 @@ namespace WorkHost2.Controllers
             {
                 Console.WriteLine("This extension is not supported");
             }
-            return "성공";
         }
-
-        private ProcessStartInfo CreateProcessStartInfo(string FileName, string Arguments)
+        private static async Task ProcessStart(ProcessStartInfo psi, long jobid, long HostId, string WorkflowName)
+        {
+            var erros = "";
+            var results = "";
+            DateTime start = DateTime.Now;
+            string StateON = Net.RAPI.StateON(jobid);
+            try
+            {
+                using (var process = Process.Start(psi))
+                {
+                    erros = process.StandardError.ReadToEnd();
+                    results = process.StandardOutput.ReadToEnd();
+                }
+                DateTime end = DateTime.Now;
+                string StateOFF = Net.RAPI.StateOFF(jobid);
+                Net.RAPI.SendAPI(start, end, "10", jobid, HostId, WorkflowName, results);
+                Console.WriteLine("성공");
+            }
+            catch (Exception ex)
+            {
+                DateTime end = DateTime.Now;
+                Net.RAPI.SendAPI(start, end, "11", jobid, HostId, WorkflowName, erros);
+                //실행 성공/실패시 쏴주는 API
+                Console.WriteLine("실패" + ex.ToString());
+            }
+        }
+        private static ProcessStartInfo CreateProcessStartInfo(string FileName, string Arguments)
         {
             var psi = new ProcessStartInfo();
             psi.UseShellExecute = false;

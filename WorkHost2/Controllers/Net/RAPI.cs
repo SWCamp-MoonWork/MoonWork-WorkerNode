@@ -46,14 +46,6 @@ namespace WorkHost2.Controllers.Net
             webRequest.Method = "POST";
             webRequest.Timeout = 30 * 1000;
             webRequest.ContentType = "application/json";
-            Console.WriteLine("===DB에 들어갈 API 값들===");
-            Console.WriteLine(start);
-            Console.WriteLine(end);
-            Console.WriteLine(state);
-            Console.WriteLine(jobs);
-            Console.WriteLine(HostId);
-            Console.WriteLine(WorkFlowaName);
-            Console.WriteLine("==========================");
 
             var obj = new RunData
             {
@@ -67,7 +59,6 @@ namespace WorkHost2.Controllers.Net
             };
 
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
-            Console.WriteLine(json.ToString());
             //보낼 데이터를 byteArray로 바꿔준다.
             byte[] byteArray = Encoding.UTF8.GetBytes(json);
 
@@ -91,7 +82,6 @@ namespace WorkHost2.Controllers.Net
                     responseText = streamReader.ReadToEnd();
                 }
             }
-            Console.WriteLine(responseText);
             return "API 발송 성공";
         }
         public static string StateON(long jobid)
@@ -103,8 +93,7 @@ namespace WorkHost2.Controllers.Net
             webRequest.Method = "PUT";
             webRequest.Timeout = 30 * 1000;
             webRequest.ContentType = "application/json";
-            Console.WriteLine(jobid + "jobid 넘기는거 성공");
-
+           
             //Data를 잘 받았는지 확인하는 response 구간
             //응답 받기
             using (HttpWebResponse resp = (HttpWebResponse)webRequest.GetResponse())
