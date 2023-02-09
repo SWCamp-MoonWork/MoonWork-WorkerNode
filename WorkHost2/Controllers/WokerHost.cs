@@ -43,8 +43,8 @@ namespace WorkHost2.Controllers
         public async Task<string> Main(WorkerHostModel mod)
         {
             Task Start = CompareExtension(mod);
-            string result = DateTime.Now.ToString();
-            return "성공시간 " + result;
+            string results = DateTime.Now.ToString();
+            return "성공시간 " + results;
         }
         public static async Task CompareExtension(WorkerHostModel mod)
         {
