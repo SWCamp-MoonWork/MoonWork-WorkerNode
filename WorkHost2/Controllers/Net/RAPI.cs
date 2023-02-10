@@ -88,7 +88,7 @@ namespace WorkHost2.Controllers.Net
         {
             string API = "http://20.249.17.147:5000/v1/job/state1";
             string responseText = string.Empty;
-
+            Console.WriteLine("state API로 넘어온 값 : " + jobid);
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(API + $"?JobId={jobid}");
             webRequest.Method = "PUT";
             webRequest.Timeout = 30 * 1000;
