@@ -219,7 +219,7 @@ namespace WorkHost2.Controllers
         }
         private static async void ProcessStart(ProcessStartInfo psi, long jobid, long HostId, string WorkflowName)
         {
-            Console.WriteLine("Job이 실행되는 메소드로 왔습니다.");
+            Console.WriteLine("Job이 실행되는 메소드로 왔습니다..");
             var erros = "";
             var results = "";
             DateTime start = DateTime.Now;
