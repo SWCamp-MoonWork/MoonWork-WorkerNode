@@ -40,6 +40,7 @@ namespace WorkHost2.Controllers
     public class WorkerHost
     {
         static long HostId = 1;
+
         [HttpPost("1")]
         //CompareExtension을 실행시키고 바로 리턴
         public async Task<string> Main(WorkerHostModel mod)
@@ -102,7 +103,7 @@ namespace WorkHost2.Controllers
                 var psi = CreateProcessStartInfo(@"/usr/bin/python3", example);
                 long jobid = mod.JobId;
                 //비동기화 프로세스 start
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
             }
             //.gz 파일을 받아 압축을 풀고 dll 파일을 실행
             else if (fileExtension == ".gz")
@@ -133,7 +134,7 @@ namespace WorkHost2.Controllers
 
                 var psi2 = CreateProcessStartInfo(@"dotnet", "./blob/" + dllFileFullname);
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
             }
             else if (fileExtension == ".zip")
             {
@@ -161,7 +162,7 @@ namespace WorkHost2.Controllers
 
                 var psi2 = CreateProcessStartInfo(@"dotnet", "./blob/" + dllFileFullname);
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
             }
             else if (fileExtension == ".7z")
             {
@@ -193,7 +194,7 @@ namespace WorkHost2.Controllers
 
                 DateTime start = DateTime.Now;
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
             }
             //blob 파일 내에 .dll 파일실행 
             else if (fileExtension == ".dll")
@@ -204,14 +205,14 @@ namespace WorkHost2.Controllers
                 var results = "";
                 DateTime start = DateTime.Now;
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
             }
             //.bash/.sh 파일 실행
             else if (fileExtension == ".sh")
             {
                 var psi = CreateProcessStartInfo(@"sh", example);
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, mod.HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
             }
             else
             {

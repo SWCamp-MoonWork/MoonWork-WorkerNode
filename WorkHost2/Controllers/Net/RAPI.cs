@@ -11,14 +11,14 @@ namespace WorkHost2.Controllers.Net
     {
         public static string JobList()
         {
-            string jobasdasd = "http://20.249.17.147:5000/v1/job/joblist_username";
+            string jobList = ignore.jobList;
 
             string result = string.Empty;
             try
             {
                 WebClient client = new WebClient();
 
-                using (Stream data = client.OpenRead(jobasdasd))
+                using (Stream data = client.OpenRead(jobList))
                 {
                     using (StreamReader reader = new StreamReader(data))
                     {
@@ -39,7 +39,7 @@ namespace WorkHost2.Controllers.Net
         }
         public static string SendAPI(DateTime start, DateTime end, string state, long jobs, long HostId, string WorkFlowaName, string result)
         {
-            string API = "http://20.249.17.147:5000/v1/run";
+            string API = ignore.sendAPI;
             string responseText = string.Empty;
 
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(API);
@@ -86,7 +86,7 @@ namespace WorkHost2.Controllers.Net
         }
         public static string StateON(long jobid)
         {
-            string API = "http://20.249.17.147:5000/v1/job/state1";
+            string API = ignore.state1;
             string responseText = string.Empty;
             Console.WriteLine("state API로 넘어온 값 : " + jobid);
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(API + $"?JobId={jobid}");
@@ -112,7 +112,7 @@ namespace WorkHost2.Controllers.Net
         }
         public static string StateOFF(long jobid)
         {
-            string API = "http://20.249.17.147:5000/v1/job/state0";
+            string API = ignore.state0;
             string responseText = string.Empty;
 
             HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(API + $"?JobId={jobid}");
