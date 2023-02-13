@@ -361,5 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-# ignore ignore.cs
+# ignore ignore.cs 
 ignore.cs
