@@ -39,6 +39,7 @@ namespace WorkHost2.Controllers
     [Route("worker")]
     public class WorkerHost
     {
+        static long HostId = 1;
         [HttpPost("1")]
         //CompareExtension을 실행시키고 바로 리턴
         public async Task<string> Main(WorkerHostModel mod)
