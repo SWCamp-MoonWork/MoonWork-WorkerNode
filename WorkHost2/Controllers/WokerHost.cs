@@ -12,15 +12,17 @@ namespace WorkHost2.Controllers
     {
         public long JobId { get; set; }
     }
-    public class RunData
+    public class RunAssign
     {
         public string? WorkFlowName { get; set; }
-        public DateTime? StartDT { get; set; }
-        public DateTime? EndDT { get; set; }
-        public string? State { get; set; }
         public long? JobId { get; set; }
         public long? HostId { get; set; }
+        public long? RunId { get; set; }
+        public DateTime? StartDT { get; set; }
+        public DateTime? EndDT { get; set; }
+        public string? state { get; set; }
         public string? ResultData { get; set; }
+
     }
     public class JobUserNameModel
     {
@@ -39,9 +41,9 @@ namespace WorkHost2.Controllers
     [Route("worker")]
     public class WorkerHost
     {
-        static long HostId = 1;
-
-        [HttpPost("1")]
+        static long HostId = 2;
+        static long RunId = 0;
+        [HttpPost("2")]
         //CompareExtension을 실행시키고 바로 리턴
         public async Task<string> Main(WorkerHostModel mod)
         {
@@ -54,6 +56,10 @@ namespace WorkHost2.Controllers
         }
         public static async void CompareExtension(WorkerHostModel mod)
         {
+            //RunId를 가지고 오는 POST API
+            RunId = Net.RAPI.SetRunTable(mod.JobId, HostId);
+            Console.WriteLine(RunId);
+
             //WorkFlowname을 받아와서 그 파일이 있는지 없는지 검사하는 파일
             string example = "blob/" + mod.WorkflowName;
 
@@ -134,11 +140,11 @@ namespace WorkHost2.Controllers
 
                 var psi2 = CreateProcessStartInfo(@"dotnet", "./blob/" + dllFileFullname);
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi2, jobid, HostId, mod.WorkflowName); });
             }
             else if (fileExtension == ".zip")
             {
-                string cmd = "unzip blob/" + filename + " -d ./blob";
+                string cmd = "unzip -o blob/" + filename + " -d ./blob";
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.UseShellExecute = false;
                 psi.FileName = "bash";
@@ -162,7 +168,7 @@ namespace WorkHost2.Controllers
 
                 var psi2 = CreateProcessStartInfo(@"dotnet", "./blob/" + dllFileFullname);
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi2, jobid, HostId, mod.WorkflowName); });
             }
             else if (fileExtension == ".7z")
             {
@@ -194,7 +200,7 @@ namespace WorkHost2.Controllers
 
                 DateTime start = DateTime.Now;
                 long jobid = mod.JobId;
-                Task t2 = Task.Run(() => { ProcessStart(psi, jobid, HostId, mod.WorkflowName); });
+                Task t2 = Task.Run(() => { ProcessStart(psi2, jobid, HostId, mod.WorkflowName); });
             }
             //blob 파일 내에 .dll 파일실행 
             else if (fileExtension == ".dll")
@@ -227,6 +233,7 @@ namespace WorkHost2.Controllers
             DateTime start = DateTime.Now;
             //Job table의 State를 10으로 수정하여 작업이 시작됬음을 알리는 메소드
             string StateON = Net.RAPI.StateON(jobid);
+            string PutStart = Net.RAPI.PutStartDT(RunId, start, WorkflowName, "01");
             try
             {
                 using (var process = Process.Start(psi))
@@ -238,8 +245,8 @@ namespace WorkHost2.Controllers
                 Console.WriteLine(results);
                 //Job table의 State를 11으로 수정하여 작업이 종료됬음을 알리는 메소드
                 string StateOFF = Net.RAPI.StateOFF(jobid);
+                string PutEnd = Net.RAPI.PutEndDT(RunId, WorkflowName, start, end, results, "10");
                 //성공시 Run table 에 정보 입력
-                Net.RAPI.SendAPI(start, end, "10", jobid, HostId, WorkflowName, results);
                 Console.WriteLine("성공");
             }
             catch (Exception ex)
@@ -248,8 +255,8 @@ namespace WorkHost2.Controllers
                 //실행 성공/실패시 쏴주는 API
                 //Job table의 State를 11으로 수정하여 작업이 종료됬음을 알리는 메소드
                 string StateOFF = Net.RAPI.StateOFF(jobid);
+                string PutEnd = Net.RAPI.PutEndDT(RunId, WorkflowName, start, end, results, "10");
                 //실패시 Run 테이블에 입력
-                Net.RAPI.SendAPI(start, end, "11", jobid, HostId, WorkflowName, erros);
                 Console.WriteLine("실패" + ex.ToString());
             }
         }
