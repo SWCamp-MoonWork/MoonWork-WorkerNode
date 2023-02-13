@@ -11,7 +11,7 @@ namespace WorkHost2.Controllers.Net
     {
         public static string JobList()
         {
-            string jobList = ignore.jobList;
+            string jobList = ignore.JobList;
 
             string result = string.Empty;
             try
